@@ -104,6 +104,8 @@ jobs:
         with:
           include_labels: "${{ env.CENTER_LABEL }},exclusive"
           required_count: ${{ env.CENTER_DNODE_COUNT }}
+          scope: repo
+          target: jiajayden
           gh_token: ${{ secrets.RUNNER_PAT }}
 
       - name: Print Key Infos
