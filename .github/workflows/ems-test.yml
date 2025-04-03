@@ -230,13 +230,13 @@ jobs:
     runs-on:
       labels: ${{ matrix.runner }}
     steps:
-      - name: Add dynamic labels
-        uses: taosdata/.github/.github/actions/dynamic-labels@main
-        with:
-          gh_token: ${{ secrets.RUNNER_PAT }}
-          operation_type: "add"
-          labels: "ems"
-          runner_name: ${{ runner.name }}
+      # - name: Add dynamic labels
+      #   uses: taosdata/.github/.github/actions/dynamic-labels@main
+      #   with:
+      #     gh_token: ${{ secrets.RUNNER_PAT }}
+      #     operation_type: "add"
+      #     labels: "ems"
+      #     runner_name: ${{ runner.name }}
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -588,25 +588,25 @@ jobs:
           name:  "perf_report_${{ env.test_start_time }}"
           path: "perf_report_${{ env.test_start_time }}.txt"
 
-  clean-up:
-    needs:
-      - test-and-report
-      - filter-runners
-    if: always()
-    strategy:
-      matrix:
-        runner:
-          - ${{ fromJson(needs.filter-runners.outputs.edge_runner_list || '[]') }}
-          - ${{ fromJson(needs.filter-runners.outputs.center_runner_list || '[]') }}
-          - ${{ fromJson(needs.filter-runners.outputs.mqtt_runner_list || '[]') }}
-          - ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
-    runs-on:
-      labels: ${{ matrix.runner }}
-    steps:
-      - name: Delete dynamic labels
-        uses: taosdata/.github/.github/actions/dynamic-labels@main
-        with:
-          gh_token: ${{ secrets.RUNNER_PAT }}
-          operation_type: "delete"
-          labels: "ems"
-          runner_name: ${{ runner.name }}
+  # clean-up:
+  #   needs:
+  #     - test-and-report
+  #     - filter-runners
+  #   if: always()
+  #   strategy:
+  #     matrix:
+  #       runner:
+  #         - ${{ fromJson(needs.filter-runners.outputs.edge_runner_list || '[]') }}
+  #         - ${{ fromJson(needs.filter-runners.outputs.center_runner_list || '[]') }}
+  #         - ${{ fromJson(needs.filter-runners.outputs.mqtt_runner_list || '[]') }}
+  #         - ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
+  #   runs-on:
+  #     labels: ${{ matrix.runner }}
+  #   steps:
+  #     - name: Delete dynamic labels
+  #       uses: taosdata/.github/.github/actions/dynamic-labels@main
+  #       with:
+  #         gh_token: ${{ secrets.RUNNER_PAT }}
+  #         operation_type: "delete"
+  #         labels: "ems"
+  #         runner_name: ${{ runner.name }}
