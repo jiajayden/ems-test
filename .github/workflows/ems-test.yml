@@ -132,7 +132,6 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
     runs-on:
-      group: default
       labels: ${{ matrix.runner }}
     steps:
       - name: Run Host Info Collection
@@ -155,7 +154,6 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.edge_runner_list || '[]') }}
     runs-on:
-      group: default
       labels: ${{ matrix.runner }}
     steps:
       - name: Run Host Info Collection
@@ -178,7 +176,6 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.center_runner_list || '[]') }}
     runs-on:
-      group: default
       labels: ${{ matrix.runner }}
     steps:
       - name: Run Host Info Collection
@@ -201,7 +198,6 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.mqtt_runner_list || '[]') }}
     runs-on:
-      group: default
       labels: ${{ matrix.runner }}
     steps:
       - name: Run Host Info Collection
@@ -232,7 +228,6 @@ jobs:
           - ${{ fromJson(needs.filter-runners.outputs.mqtt_runner_list || '[]') }}
           - ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
     runs-on:
-      group: default
       labels: ${{ matrix.runner }}
     steps:
       - name: Add dynamic labels
@@ -273,7 +268,6 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.center_runner_list || '[]') }}
     runs-on:
-      group: default
       labels: ${{ matrix.runner }}
     steps:
       - name: Install TDengine Enterprise
@@ -303,7 +297,6 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.edge_runner_list || '[]') }}
     runs-on:
-      group: default
       labels: ${{ matrix.runner }}
     steps:
       - name: Install Flashmq
@@ -336,7 +329,6 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.mqtt_runner_list || '[]') }}
     runs-on:
-      group: default
       labels: ${{ matrix.runner }}
     steps:
       # - name: Checkout code
@@ -371,7 +363,6 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
     runs-on:
-      group: default
       labels: ${{ matrix.runner }}
     steps:
       - name: Export Client IP
@@ -540,7 +531,6 @@ jobs:
       matrix:
         runner: ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
     runs-on:
-      group: default
       labels: ${{ matrix.runner }}
     steps:
       # - name: Checkout code
@@ -611,7 +601,6 @@ jobs:
           - ${{ fromJson(needs.filter-runners.outputs.mqtt_runner_list || '[]') }}
           - ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
     runs-on:
-      group: default
       labels: ${{ matrix.runner }}
     steps:
       - name: Delete dynamic labels
