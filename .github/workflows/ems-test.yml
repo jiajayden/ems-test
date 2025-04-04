@@ -237,8 +237,8 @@ jobs:
           operation_type: "add"
           labels: "ems"
           runner_name: ${{ runner.name }}
-          scope: org
-          target: taosdata
+          scope: repo
+          target: jiajayden/ems-test
 
       - name: Checkout code
         uses: actions/checkout@v4
