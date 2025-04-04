@@ -49,10 +49,10 @@ permissions:
   contents: read
 
 env :
-  MQTT_LABEL : "4C8G"
-  EDGE_LABEL : "4C10G"
-  CENTER_LABEL : "4C10G"
-  CLIENT_LABEL : "8C12G"
+  MQTT_LABEL : "8C16G"
+  EDGE_LABEL : "20C16G"
+  CENTER_LABEL : "20C16G"
+  CLIENT_LABEL : "24C64G"
   EDGE_DNODE_COUNT : ${{ github.event.inputs.edge-dnode-count }}
   CENTER_DNODE_COUNT : ${{ github.event.inputs.center-dnode-count }}
   HOSTS_DIRNAME: "ip-hostname"
@@ -80,8 +80,6 @@ jobs:
           include_labels: ${{ env.CLIENT_LABEL }}
           required_count: 1
           gh_token: ${{ secrets.RUNNER_PAT }}
-          scope: repo
-          target: "jiajayden/ems-test"
 
       - name: Get MQTT Runners
         id: get-mqtt-runners
@@ -90,8 +88,6 @@ jobs:
           include_labels: ${{ env.MQTT_LABEL }}
           required_count: ${{ env.EDGE_DNODE_COUNT }}
           gh_token: ${{ secrets.RUNNER_PAT }}
-          scope: repo
-          target: "jiajayden/ems-test"
 
       - name: Get Edge Runners
         id: get-edge-runners
@@ -101,8 +97,6 @@ jobs:
           required_count: ${{ env.EDGE_DNODE_COUNT }}
           exclude_labels: "exclusive"
           gh_token: ${{ secrets.RUNNER_PAT }}
-          scope: repo
-          target: "jiajayden/ems-test"
 
       - name: Get Center Runners
         id: center-edge-runners
@@ -110,8 +104,6 @@ jobs:
         with:
           include_labels: "${{ env.CENTER_LABEL }},exclusive"
           required_count: ${{ env.CENTER_DNODE_COUNT }}
-          scope: repo
-          target: "jiajayden/ems-test"
           gh_token: ${{ secrets.RUNNER_PAT }}
 
       - name: Print Key Infos
@@ -132,11 +124,12 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
     runs-on:
+      group: customers
       labels: ${{ matrix.runner }}
     steps:
       - name: Run Host Info Collection
         id: collect-host-info
-        uses: taosdata/.github/.github/actions/upload-host-info@enh/TD-34342
+        uses: taosdata/.github/.github/actions/upload-host-info@main
         with:
           hosts_dirname: ${{ env.HOSTS_DIRNAME }}
           role: "client"
@@ -154,11 +147,12 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.edge_runner_list || '[]') }}
     runs-on:
+      group: customers
       labels: ${{ matrix.runner }}
     steps:
       - name: Run Host Info Collection
         id: collect-host-info
-        uses: taosdata/.github/.github/actions/upload-host-info@enh/TD-34342
+        uses: taosdata/.github/.github/actions/upload-host-info@main
         with:
           hosts_dirname: ${{ env.HOSTS_DIRNAME }}
           role: "edge"
@@ -176,11 +170,12 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.center_runner_list || '[]') }}
     runs-on:
+      group: customers
       labels: ${{ matrix.runner }}
     steps:
       - name: Run Host Info Collection
         id: collect-host-info
-        uses: taosdata/.github/.github/actions/upload-host-info@enh/TD-34342
+        uses: taosdata/.github/.github/actions/upload-host-info@main
         with:
           hosts_dirname: ${{ env.HOSTS_DIRNAME }}
           role: "center"
@@ -198,11 +193,12 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.mqtt_runner_list || '[]') }}
     runs-on:
+      group: customers
       labels: ${{ matrix.runner }}
     steps:
       - name: Run Host Info Collection
         id: collect-host-info
-        uses: taosdata/.github/.github/actions/upload-host-info@enh/TD-34342
+        uses: taosdata/.github/.github/actions/upload-host-info@main
         with:
           hosts_dirname: ${{ env.HOSTS_DIRNAME }}
           role: "mqtt"
@@ -228,15 +224,18 @@ jobs:
           - ${{ fromJson(needs.filter-runners.outputs.mqtt_runner_list || '[]') }}
           - ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
     runs-on:
+      group: customers
       labels: ${{ matrix.runner }}
     steps:
-      # - name: Add dynamic labels
-      #   uses: taosdata/.github/.github/actions/dynamic-labels@main
-      #   with:
-      #     gh_token: ${{ secrets.RUNNER_PAT }}
-      #     operation_type: "add"
-      #     labels: "ems"
-      #     runner_name: ${{ runner.name }}
+      - name: Add dynamic labels
+        uses: taosdata/.github/.github/actions/dynamic-labels@main
+        with:
+          gh_token: ${{ secrets.RUNNER_PAT }}
+          operation_type: "add"
+          labels: "ems"
+          runner_name: ${{ runner.name }}
+          scope: org
+          target: taosdata
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -268,13 +267,14 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.center_runner_list || '[]') }}
     runs-on:
+      group: customers
       labels: ${{ matrix.runner }}
     steps:
       - name: Install TDengine Enterprise
         uses: taosdata/.github/.github/actions/install-tdengine-enterprise@main
         with:
           version: ${{ github.event.inputs.td-version }}
-          download_url: ${{ secrets.NAS_DOWNLOAD_URL }}
+          download_url: ${{ secrets.ASSETS_DL_URL }}
 
       - name: Install Node Exporter In TDengine Nodes
         uses: taosdata/.github/.github/actions/install-node-exporter@main
@@ -297,6 +297,7 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.edge_runner_list || '[]') }}
     runs-on:
+      group: customers
       labels: ${{ matrix.runner }}
     steps:
       - name: Install Flashmq
@@ -306,7 +307,7 @@ jobs:
         uses: taosdata/.github/.github/actions/install-tdengine-enterprise@main
         with:
           version: ${{ github.event.inputs.td-version }}
-          download_url: ${{ secrets.NAS_DOWNLOAD_URL }}
+          download_url: ${{ secrets.ASSETS_DL_URL }}
 
       - name: Install Node Exporter In TDengine Nodes
         uses: taosdata/.github/.github/actions/install-node-exporter@main
@@ -329,13 +330,14 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.mqtt_runner_list || '[]') }}
     runs-on:
+      group: customers
       labels: ${{ matrix.runner }}
     steps:
       # - name: Checkout code
       #   uses: actions/checkout@v4
 
       - name: Install MQTT CLI
-        uses: taosdata/.github/.github/actions/install-mqtt-simulator@enh/TD-34342
+        uses: taosdata/.github/.github/actions/install-mqtt-simulator@main
         with:
           pub_dl_url: ${{ secrets.PUB_DL_URL }}
 
@@ -363,6 +365,7 @@ jobs:
         runner:
           - ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
     runs-on:
+      group: customers
       labels: ${{ matrix.runner }}
     steps:
       - name: Export Client IP
@@ -397,15 +400,15 @@ jobs:
 
       - name: Deploy Taostest
         id: deploy-taostest
-        uses: taosdata/.github/.github/actions/deploy-taostest@enh/TD-34342
+        uses: taosdata/.github/.github/actions/deploy-taostest@main
         with:
           pub_dl_url: ${{ secrets.PUB_DL_URL }}
 
       - name: Install TDengine Enterprise
         uses: taosdata/.github/.github/actions/install-tdengine-enterprise@main
         with:
-            version: ${{ github.event.inputs.td-version }}
-            download_url: ${{ secrets.NAS_DOWNLOAD_URL }}
+          version: ${{ github.event.inputs.td-version }}
+          download_url: ${{ secrets.ASSETS_DL_URL }}
 
       - name: Install Grafana In Taostest Node
         uses: taosdata/.github/.github/actions/install-grafana@main
@@ -426,7 +429,7 @@ jobs:
           process_names: "${{ env.MONITORING_PROCESS_NAMES }}"
 
       - name: Gen Taostest Hosts
-        uses: taosdata/.github/.github/actions/gen-taostest-env@enh/TD-34342
+        uses: taosdata/.github/.github/actions/gen-taostest-env@main
         with:
           json_file: "$RUNNER_WORKSPACE/${{ env.HOSTS_DIRNAME }}/${{ env.ROLE_FILE }}"
           test_root: "$GITHUB_WORKSPACE/tests"
@@ -445,7 +448,7 @@ jobs:
           process_exporter_hosts: $HOSTNAME_INFO
 
       - name: Import Grafana Dashboard
-        uses: taosdata/.github/.github/actions/import-grafana-dashboard@enh/TD-34342
+        uses: taosdata/.github/.github/actions/import-grafana-dashboard@main
         with:
           grafana-url: http://grafana.tdengine.net:3000
           prometheus-url: http://${{ env.CLIENT_IP }}:9090
@@ -531,6 +534,7 @@ jobs:
       matrix:
         runner: ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
     runs-on:
+      group: customers
       labels: ${{ matrix.runner }}
     steps:
       # - name: Checkout code
@@ -562,21 +566,24 @@ jobs:
           db_config_json=$GITHUB_WORKSPACE/config/db_config.json
           mv $db_config_json $query_json $TEST_ROOT/env
 
+          EDGE_COUNT=${{ github.event.inputs.edge-dnode-count }}
+
           taostest --convert-json=ems-center.json
-          taostest --convert-json=ems-edge-1.json
-          taostest --convert-json=ems-edge-2.json
           taostest --convert-json=ems-query.json
+
           taostest --setup=ems-center.yaml --case=customer_scenarios/ems/start.py --keep
-          taostest --setup=ems-edge-1.yaml --case=customer_scenarios/ems/start.py --keep
-          taostest --setup=ems-edge-2.yaml --case=customer_scenarios/ems/start.py --keep
-          taostest --use=ems-edge-1.yaml --case=customer_scenarios/ems/ems_edge.py --keep
-          taostest --use=ems-edge-2.yaml --case=customer_scenarios/ems/ems_edge.py --keep
+          for ((i=1; i<=$EDGE_COUNT; i++)); do
+            taostest --convert-json=ems-edge-$i.json
+            taostest --setup=ems-edge-$i.yaml --case=customer_scenarios/ems/start.py --keep
+            taostest --use=ems-edge-$i.yaml --case=customer_scenarios/ems/ems_edge.py --keep
+          done
           sleep 60
           taostest --use=ems-center.yaml --case=customer_scenarios/ems/ems_center.py --keep
           taostest --use=ems-query.yaml --case=customer_scenarios/ems/ems_query.py --keep
           sleep ${{ github.event.inputs.exec-time }}
-          taostest --use=ems-edge-1.yaml --case=customer_scenarios/ems/stop.py --keep
-          taostest --use=ems-edge-2.yaml --case=customer_scenarios/ems/stop.py --keep
+          for ((i=1; i<=$EDGE_COUNT; i++)); do
+            taostest --use=ems-edge-$i.yaml --case=customer_scenarios/ems/stop.py --keep
+          done
           taostest --use=ems-center.yaml --case=customer_scenarios/ems/stop.py --keep
           taostest --use=ems-query.yaml --case=customer_scenarios/ems/ems_summary.py --keep
           echo "🔄 Test finished at $(date)"
@@ -588,25 +595,28 @@ jobs:
           name:  "perf_report_${{ env.test_start_time }}"
           path: "perf_report_${{ env.test_start_time }}.txt"
 
-  # clean-up:
-  #   needs:
-  #     - test-and-report
-  #     - filter-runners
-  #   if: always()
-  #   strategy:
-  #     matrix:
-  #       runner:
-  #         - ${{ fromJson(needs.filter-runners.outputs.edge_runner_list || '[]') }}
-  #         - ${{ fromJson(needs.filter-runners.outputs.center_runner_list || '[]') }}
-  #         - ${{ fromJson(needs.filter-runners.outputs.mqtt_runner_list || '[]') }}
-  #         - ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
-  #   runs-on:
-  #     labels: ${{ matrix.runner }}
-  #   steps:
-  #     - name: Delete dynamic labels
-  #       uses: taosdata/.github/.github/actions/dynamic-labels@main
-  #       with:
-  #         gh_token: ${{ secrets.RUNNER_PAT }}
-  #         operation_type: "delete"
-  #         labels: "ems"
-  #         runner_name: ${{ runner.name }}
+  clean-up:
+    needs:
+      - test-and-report
+      - filter-runners
+    if: always()
+    strategy:
+      matrix:
+        runner:
+          - ${{ fromJson(needs.filter-runners.outputs.edge_runner_list || '[]') }}
+          - ${{ fromJson(needs.filter-runners.outputs.center_runner_list || '[]') }}
+          - ${{ fromJson(needs.filter-runners.outputs.mqtt_runner_list || '[]') }}
+          - ${{ fromJson(needs.filter-runners.outputs.client_runner_list || '[]') }}
+    runs-on:
+      group: customers
+      labels: ${{ matrix.runner }}
+    steps:
+      - name: Delete dynamic labels
+        uses: taosdata/.github/.github/actions/dynamic-labels@main
+        with:
+          gh_token: ${{ secrets.RUNNER_PAT }}
+          operation_type: "delete"
+          labels: "ems"
+          runner_name: ${{ runner.name }}
+          scope: org
+          target: taosdata
