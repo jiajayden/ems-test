@@ -87,7 +87,8 @@ class EMSQuery(TDCase):
         self.tdRest.request(f'flush database {self.dbname};')
         # self.tdRest.request(data=f"show table distributed center_db.site_topic6_mqtt_u2_193;")
         self.tdRest.request(f'show {self.dbname}.disk_info;')
-
+        self._remote._logger.info(f'---self.tdRest.resp: {self.tdRest.resp}')
+        print(f'---self.tdRest.resp: {self.tdRest.resp}')
         query_res = self.tdRest.resp['data'][0][0]
         compression_ratio = query_res.split("=")[1].replace("[", "").replace("]", "") + "%"
         return compression_ratio
@@ -143,6 +144,8 @@ class EMSQuery(TDCase):
         insert_perf = self.get_insert_result()
         query_perf = self.get_query_detail_result()
         compression_ratio = self.get_compression_ratio()
+        self._remote._logger.info(f'---compression_ratio: {compression_ratio}')
+        print(f'---compression_ratio: {compression_ratio}')
         grafana_url = self.get_grafana_url()
         test_specs = self.get_test_specs()
         final_res_dict = {
