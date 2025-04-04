@@ -49,10 +49,10 @@ permissions:
   contents: read
 
 env :
-  MQTT_LABEL : "8C16G"
+  MQTT_LABEL : "4C8G"
   EDGE_LABEL : "4C10G"
   CENTER_LABEL : "4C10G"
-  CLIENT_LABEL : "4C8G"
+  CLIENT_LABEL : "8C16G"
   EDGE_DNODE_COUNT : ${{ github.event.inputs.edge-dnode-count }}
   CENTER_DNODE_COUNT : ${{ github.event.inputs.center-dnode-count }}
   HOSTS_DIRNAME: "ip-hostname"
