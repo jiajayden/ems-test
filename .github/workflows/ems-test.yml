@@ -80,6 +80,8 @@ jobs:
           include_labels: ${{ env.CLIENT_LABEL }}
           required_count: 1
           gh_token: ${{ secrets.RUNNER_PAT }}
+          scope: repo
+          target: jiajayden/ems-test
 
       - name: Get MQTT Runners
         id: get-mqtt-runners
@@ -88,6 +90,8 @@ jobs:
           include_labels: ${{ env.MQTT_LABEL }}
           required_count: ${{ env.EDGE_DNODE_COUNT }}
           gh_token: ${{ secrets.RUNNER_PAT }}
+          scope: repo
+          target: jiajayden/ems-test
 
       - name: Get Edge Runners
         id: get-edge-runners
@@ -97,6 +101,8 @@ jobs:
           required_count: ${{ env.EDGE_DNODE_COUNT }}
           exclude_labels: "exclusive"
           gh_token: ${{ secrets.RUNNER_PAT }}
+          scope: repo
+          target: jiajayden/ems-test
 
       - name: Get Center Runners
         id: center-edge-runners
@@ -105,6 +111,8 @@ jobs:
           include_labels: "${{ env.CENTER_LABEL }},exclusive"
           required_count: ${{ env.CENTER_DNODE_COUNT }}
           gh_token: ${{ secrets.RUNNER_PAT }}
+          scope: repo
+          target: jiajayden/ems-test
 
       - name: Print Key Infos
         run: |
@@ -607,5 +615,5 @@ jobs:
           operation_type: "delete"
           labels: "ems"
           runner_name: ${{ runner.name }}
-          scope: org
-          target: taosdata
+          scope: repo
+          target: jiajayden/ems-test
