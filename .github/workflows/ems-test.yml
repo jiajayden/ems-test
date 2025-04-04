@@ -61,7 +61,7 @@ env :
   MONITORING_PROCESS_NAMES: "taosd,taosadapter,taostest,taosBenchmark"
   ROLE_FILE: "role_info.json"
   WORKFLOW_CONFIG_FILE: "workflow_config.json"
-  GRAFANA_DATASOURCE_NAME: "tdengine-processes"
+  GRAFANA_DATASOURCE_NAME: "tdengine-processes-u3-190"
 
 jobs:
   filter-runners:
