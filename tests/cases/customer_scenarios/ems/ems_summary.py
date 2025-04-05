@@ -100,25 +100,41 @@ class EMSQuery(TDCase):
 
         # Retry logic with self.timeout
         start_time = time.time()
+        stable_threshold = 3  # Number of consecutive stable readings required
+        stable_count = 0
+        last_ratio = None
         compression_ratio = None
 
         while time.time() - start_time < self.timeout:
             # Query disk info
             self.tdRest.request(f'show {self.dbname}.disk_info;')
-            query_res = self.tdRest.resp['data'][0][0]
+
             # Check response structure and data
-            if self.tdRest.resp.get('code') == 0 and query_res:
+            if self.tdRest.resp.get('code') == 0 and self.tdRest.resp.get('data'):
+                query_res = self.tdRest.resp['data'][0][0]
                 if 'Compress_radio' in query_res:
                     ratio_str = query_res.split("=")[1].replace("[", "").replace("]", "")
-                    if ratio_str != 'NULL':
-                        compression_ratio = f"{ratio_str}%"
-                        return compression_ratio
 
-            # Wait before next retry (exponential backoff)
+                    # Skip NULL values
+                    if ratio_str == 'NULL':
+                        continue
+
+                    # Check if ratio has changed
+                    if ratio_str != last_ratio:
+                        last_ratio = ratio_str
+                        stable_count = 0
+                    else:
+                        stable_count += 1
+
+                    # Return when ratio is stable
+                    if stable_count >= stable_threshold:
+                        return f"{ratio_str}%"
+
+            # Wait for next check (keeping your exponential backoff logic)
             time.sleep(min(1, self.timeout - (time.time() - start_time)))
 
-        # Return NULL if self.timeout reached
-        return "NULL%"
+        # Return final result (last seen ratio or NULL)
+        return f"{last_ratio}%" if last_ratio is not None else "NULL%"
 
     def get_grafana_url(self):
         return self.case_config['grafana_url']
