@@ -6,7 +6,7 @@ from taostest.util.common import TDCom
 import re
 import requests
 from taostest.util.rest import TDRest
-
+import time
 class EMSQuery(TDCase):
     def init(self):
         self._remote: Remote = Remote(self.logger)
@@ -21,6 +21,7 @@ class EMSQuery(TDCase):
         self.detail_log_path = f'{self.log_path}/details'
         self.summary_log_path = f'{self.log_path}/summary'
         self._remote.cmd("localhost", [f'mkdir -p {self.detail_log_path}', f'mkdir -p {self.summary_log_path}'])
+        self.timeout = 20  # Maximum wait time in seconds
         self.dbname = "center_db"
         self.report_file = f'{self.log_path}/perf_report_{self.case_config["test_start_time"]}.txt'
         self.test_robot_url = (
@@ -83,15 +84,41 @@ class EMSQuery(TDCase):
                     insert_res_list.append(data)
         return insert_res_list
 
+    # def get_compression_ratio(self):
+    #     self.tdRest.request(f'flush database {self.dbname};')
+    #     # self.tdRest.request(data=f"show table distributed center_db.site_topic6_mqtt_u2_193;")
+    #     self.tdRest.request(f'show {self.dbname}.disk_info;')
+
+    #     query_res = self.tdRest.resp['data'][0][0]
+    #     compression_ratio = query_res.split("=")[1].replace("[", "").replace("]", "") + "%"
+    #     return compression_ratio
+
     def get_compression_ratio(self):
+
+        # Flush the database first
         self.tdRest.request(f'flush database {self.dbname};')
-        # self.tdRest.request(data=f"show table distributed center_db.site_topic6_mqtt_u2_193;")
-        self.tdRest.request(f'show {self.dbname}.disk_info;')
-        self._remote._logger.info(f'---self.tdRest.resp: {self.tdRest.resp}')
-        print(f'---self.tdRest.resp: {self.tdRest.resp}')
-        query_res = self.tdRest.resp['data'][0][0]
-        compression_ratio = query_res.split("=")[1].replace("[", "").replace("]", "") + "%"
-        return compression_ratio
+
+        # Retry logic with self.timeout
+        start_time = time.time()
+        compression_ratio = None
+
+        while time.time() - start_time < self.timeout:
+            # Query disk info
+            self.tdRest.request(f'show {self.dbname}.disk_info;')
+            query_res = self.tdRest.resp['data'][0][0]
+            # Check response structure and data
+            if self.tdRest.resp.get('code') == 0 and query_res:
+                if 'Compress_radio' in query_res:
+                    ratio_str = query_res.split("=")[1].replace("[", "").replace("]", "")
+                    if ratio_str != 'NULL':
+                        compression_ratio = f"{ratio_str}%"
+                        return compression_ratio
+
+            # Wait before next retry (exponential backoff)
+            time.sleep(min(1, self.timeout - (time.time() - start_time)))
+
+        # Return NULL if self.timeout reached
+        return "NULL%"
 
     def get_grafana_url(self):
         return self.case_config['grafana_url']
@@ -144,8 +171,6 @@ class EMSQuery(TDCase):
         insert_perf = self.get_insert_result()
         query_perf = self.get_query_detail_result()
         compression_ratio = self.get_compression_ratio()
-        self._remote._logger.info(f'---compression_ratio: {compression_ratio}')
-        print(f'---compression_ratio: {compression_ratio}')
         grafana_url = self.get_grafana_url()
         test_specs = self.get_test_specs()
         final_res_dict = {
