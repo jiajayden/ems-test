@@ -53,6 +53,8 @@ env :
   EDGE_LABEL : "4C10G"
   CENTER_LABEL : "4C10G"
   CLIENT_LABEL : "8C12G"
+  SCOPE: "repo"
+  TARGET: "github_account_name/repo_name"
   EDGE_DNODE_COUNT : ${{ github.event.inputs.edge-dnode-count }}
   CENTER_DNODE_COUNT : ${{ github.event.inputs.center-dnode-count }}
   HOSTS_DIRNAME: "ip-hostname"
@@ -80,8 +82,8 @@ jobs:
           include_labels: ${{ env.CLIENT_LABEL }}
           required_count: 1
           gh_token: ${{ secrets.RUNNER_PAT }}
-          scope: repo
-          target: jiajayden/ems-test
+          scope: ${{ env.SCOPE }}
+          target: ${{ env.TARGET }}
 
       - name: Get MQTT Runners
         id: get-mqtt-runners
@@ -90,8 +92,8 @@ jobs:
           include_labels: ${{ env.MQTT_LABEL }}
           required_count: ${{ env.EDGE_DNODE_COUNT }}
           gh_token: ${{ secrets.RUNNER_PAT }}
-          scope: repo
-          target: jiajayden/ems-test
+          scope: ${{ env.SCOPE }}
+          target: ${{ env.TARGET }}
 
       - name: Get Edge Runners
         id: get-edge-runners
@@ -101,8 +103,8 @@ jobs:
           required_count: ${{ env.EDGE_DNODE_COUNT }}
           exclude_labels: "exclusive"
           gh_token: ${{ secrets.RUNNER_PAT }}
-          scope: repo
-          target: jiajayden/ems-test
+          scope: ${{ env.SCOPE }}
+          target: ${{ env.TARGET }}
 
       - name: Get Center Runners
         id: center-edge-runners
@@ -111,8 +113,8 @@ jobs:
           include_labels: "${{ env.CENTER_LABEL }},exclusive"
           required_count: ${{ env.CENTER_DNODE_COUNT }}
           gh_token: ${{ secrets.RUNNER_PAT }}
-          scope: repo
-          target: jiajayden/ems-test
+          scope: ${{ env.SCOPE }}
+          target: ${{ env.TARGET }}
 
       - name: Print Key Infos
         run: |
@@ -237,8 +239,8 @@ jobs:
           operation_type: "add"
           labels: "ems"
           runner_name: ${{ runner.name }}
-          scope: repo
-          target: jiajayden/ems-test
+          scope: ${{ env.SCOPE }}
+          target: ${{ env.TARGET }}
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -615,5 +617,5 @@ jobs:
           operation_type: "delete"
           labels: "ems"
           runner_name: ${{ runner.name }}
-          scope: repo
-          target: jiajayden/ems-test
+          scope: ${{ env.SCOPE }}
+          target: ${{ env.TARGET }}
